@@ -111,3 +111,37 @@ resource "aws_lb_listener_rule" "atlantis" {
     target_group_arn = aws_lb_target_group.atlantis.arn
   }
 }
+
+resource "aws_lb_target_group" "atlantis" {
+  name = "${var.cluster_name}-atlantis"
+
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = data.aws_vpc.default.id
+
+  health_check {
+    path                = "/healthz"
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 60
+    timeout             = 59
+    healthy_threshold   = 5
+    unhealthy_threshold = 5
+  }
+}
+
+resource "aws_lb_listener_rule" "atlantis" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 200
+
+  condition {
+    path_pattern {
+      values = ["/events/*"]
+    }
+  }
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.atlantis.arn
+  }
+}
