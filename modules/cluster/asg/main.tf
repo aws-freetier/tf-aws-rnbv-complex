@@ -18,14 +18,9 @@ data "terraform_remote_state" "db" {
 }
 
 resource "aws_launch_configuration" "this" {
-  image_id      = var.image_id
-  instance_type = var.instance_type
-  security_groups = [
-    aws_security_group.world.id,
-    aws_security_group.atlantis.id,
-    aws_security_group.ssh.id,
-    aws_security_group.web.id
-  ]
+  image_id             = var.image_id
+  instance_type        = var.instance_type
+  security_groups      = [aws_security_group.dmz.id]
   key_name             = var.key_name
   user_data            = var.user_data
   iam_instance_profile = var.iam_instance_profile
@@ -52,13 +47,13 @@ resource "aws_autoscaling_group" "this" {
   }
 }
 
-resource "aws_security_group" "ssh" {
-  name = "${var.cluster_name}-ssh"
+resource "aws_security_group" "dmz" {
+  name = "${var.cluster_name}-dmz"
 }
 
 resource "aws_security_group_rule" "allow_ssh" {
   type              = "ingress"
-  security_group_id = aws_security_group.ssh.id
+  security_group_id = aws_security_group.dmz.id
 
   from_port   = 22
   to_port     = 22
@@ -66,27 +61,9 @@ resource "aws_security_group_rule" "allow_ssh" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
-resource "aws_security_group" "web" {
-  name = "${var.cluster_name}-web"
-}
-
-resource "aws_security_group_rule" "allow_web" {
-  type              = "ingress"
-  security_group_id = aws_security_group.web.id
-
-  from_port   = 80
-  to_port     = 80
-  protocol    = "TCP"
-  cidr_blocks = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group" "atlantis" {
-  name = "${var.cluster_name}-atlantis"
-}
-
 resource "aws_security_group_rule" "allow_atlantis" {
   type              = "ingress"
-  security_group_id = aws_security_group.atlantis.id
+  security_group_id = aws_security_group.dmz.id
 
   from_port   = 4141
   to_port     = 4141
@@ -94,13 +71,9 @@ resource "aws_security_group_rule" "allow_atlantis" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
-resource "aws_security_group" "world" {
-  name = "${var.cluster_name}-out"
-}
-
 resource "aws_security_group_rule" "allow_all_out" {
   type              = "egress"
-  security_group_id = aws_security_group.world.id
+  security_group_id = aws_security_group.dmz.id
 
   from_port        = 0
   to_port          = 0
