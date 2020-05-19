@@ -102,23 +102,7 @@ resource "aws_lb_listener_rule" "atlantis" {
 
   condition {
     path_pattern {
-      values = ["/events"]
-    }
-  }
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.atlantis.arn
-  }
-}
-
-resource "aws_lb_listener_rule" "atlantis_lock" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 200
-
-  condition {
-    path_pattern {
-      values = ["/events/*"]
+      values = ["/*"]
     }
   }
 
