@@ -26,3 +26,9 @@ variable "webhook_secret" {
   type        = string
   default     = ""
 }
+
+variable "organization_name" {
+  description = "The organization name"
+  type        = string
+  default     = ""
+}

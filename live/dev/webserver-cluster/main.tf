@@ -59,8 +59,6 @@ resource "aws_key_pair" "deployer" {
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCfObcpiUJAYEGXnJ0FOcyTM6pFvs1tTFKhpuNWfE/sssk7oGnM2Kw3zdktg7Ykq/LV+tOlxl9VtBa9FN6BQmxMi/bW96c47rGYL8VMPCQ3e7Qa7mKjbx1coBcQg9gxaLpWA73oD41O2cHYit084SlS8BTiRl1f4Lc9nPKM9RKyOzC6zajyIBFLDjOcRgVkEVoEW8QYroAFLJwKuKqu9oI9HAuov0c1o99J4ASqKmC/rm/76d1Fhs83dXNhLldmme7aN7M7XKX+8NM7hPeJtG3LGuxOtVMmMOhPkqG7FbtFWhKuXvD5CdU/S7QkxGo3lkZE+cwrUqKWQmEB6t4lKkxB"
 }
 
-//resource "null_resource" "demo" {}
-
 module "asg" {
   source = "../../../modules/cluster/asg"
 
@@ -93,17 +91,17 @@ module "security" {
   name = local.secretmanager_key
 }
 
-// future github integration
-/*
 module "github" {
   source = "../../../modules/common/github"
 
   webhook_url = local.atlantis_url
   webhook_secret = local.webhook_secret
   github_token = local.github_token
-  atlantis_allowed_repo_names = [local.github_repo_url]
+  organization_name = local.github_username
+  atlantis_allowed_repo_names = [local.github_repo]
 }
-*/
+
+//resource "null_resource" "demo" {}
 
 // for demo purpose
 /*
