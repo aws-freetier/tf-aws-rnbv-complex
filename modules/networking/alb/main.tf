@@ -102,7 +102,7 @@ resource "aws_lb_listener_rule" "atlantis" {
 
   condition {
     path_pattern {
-      values = ["/events/*"]
+      values = ["/events"]
     }
   }
 
