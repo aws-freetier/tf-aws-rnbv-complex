@@ -47,4 +47,5 @@ atlantis server \
 --gh-user="$USERNAME" \
 --gh-token="$TOKEN" \
 --gh-webhook-secret="$SECRET" \
---repo-whitelist="$REPO_WHITELIST" &> /tmp/atlantis-server.log &
+--repo-whitelist="$REPO_WHITELIST" \
+--log-level="debug" &> /tmp/atlantis-server.log &
