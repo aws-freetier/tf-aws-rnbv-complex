@@ -66,8 +66,8 @@ module "asg" {
   db_remote_state_bucket = "tf-state-eu-west-2-rnbv"
   db_remote_state_key    = "dev/services/webserver-cluster/terraform.tfstate"
 
-  min_size             = 1
-  max_size             = 4
+  min_size             = 2
+  max_size             = 3
   image_id             = data.aws_ami.ami2.id
   instance_type        = local.instance_type
   key_name             = aws_key_pair.deployer.key_name
