@@ -50,6 +50,7 @@ data "template_file" "user_data" {
   }
 }
 
+// retrieve permissions fro ec2 instances
 data "aws_iam_instance_profile" "ora2postgres_atlantis" {
   name = "ora2postgres_atlantis"
 }
@@ -59,6 +60,7 @@ resource "aws_key_pair" "deployer" {
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCfObcpiUJAYEGXnJ0FOcyTM6pFvs1tTFKhpuNWfE/sssk7oGnM2Kw3zdktg7Ykq/LV+tOlxl9VtBa9FN6BQmxMi/bW96c47rGYL8VMPCQ3e7Qa7mKjbx1coBcQg9gxaLpWA73oD41O2cHYit084SlS8BTiRl1f4Lc9nPKM9RKyOzC6zajyIBFLDjOcRgVkEVoEW8QYroAFLJwKuKqu9oI9HAuov0c1o99J4ASqKmC/rm/76d1Fhs83dXNhLldmme7aN7M7XKX+8NM7hPeJtG3LGuxOtVMmMOhPkqG7FbtFWhKuXvD5CdU/S7QkxGo3lkZE+cwrUqKWQmEB6t4lKkxB"
 }
 
+// setup autoscaling group
 module "asg" {
   source = "../../../modules/cluster/asg"
 
@@ -77,6 +79,7 @@ module "asg" {
   target_group_atlantis_arn = module.alb.target_group_atlantis_arn
 }
 
+// setup loadbalancer
 module "alb" {
   source = "../../../modules/networking/alb"
 
@@ -85,12 +88,14 @@ module "alb" {
   db_remote_state_key    = "dev/services/webserver-cluster/terraform.tfstate"
 }
 
+// retrieve sensitive data from secrets manager
 module "security" {
   source = "../../../modules/security/secret"
 
   name = local.secretmanager_key
 }
 
+// create webhook on github repo
 module "github" {
   source = "../../../modules/common/github"
 
