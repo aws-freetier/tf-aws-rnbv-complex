@@ -1,9 +1,13 @@
+.idea
+*.iml
+
 # Local .terraform directories
 **/.terraform/*
 
 # .tfstate files
 *.tfstate
 *.tfstate.*
+*.tfstate.lock.info
 
 # Crash log files
 crash.log
