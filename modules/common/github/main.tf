@@ -1,7 +1,8 @@
 ###
 provider "github" {
   token      = var.github_token
-  individual = true
+  individual = false
+  organization = var.organization_name
 }
 
 resource "github_repository_webhook" "this" {

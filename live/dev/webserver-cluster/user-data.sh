@@ -31,38 +31,11 @@ sudo rm -rf ~/downloads/
 # REPO_WHITELIST - path to repository
 # <domain.name>/<github_username>/<project_name>
 # e.g. github.com/runatlantis/atlantis
-#
-#
 export URL=${url}
 export USERNAME=${username}
 export TOKEN=${token}
 export SECRET=${webhook_secret}
 export REPO_WHITELIST=${repo_whitelist}
-
-# create webhook json for github project and save to file
-echo "{
-  \"name\": \"web\",
-  \"active\": true,
-  \"events\": [
-    \"issue_comment\",
-    \"pull_request\",
-    \"pull_request_review\",
-    \"push\"
-  ],
-  \"config\": {
-    \"content_type\": \"json\",
-    \"insecure_ssl\": \"0\",
-    \"secret\": \"$SECRET\",
-    \"url\": \"$URL\"
-  }
-}"  > data.json
-
-# create webhook on github side
-curl -X POST \
--u $USERNAME:$TOKEN \
--H "Content-Type: application/json" \
--d @data.json \
-https://api.github.com/repos/$USERNAME/tf-aws-rnbv-complex/hooks
 
 # clean sources
 sudo yum -y clean all
@@ -74,4 +47,5 @@ atlantis server \
 --gh-user="$USERNAME" \
 --gh-token="$TOKEN" \
 --gh-webhook-secret="$SECRET" \
---repo-whitelist="$REPO_WHITELIST" &> /tmp/atlantis-server.log &
+--repo-whitelist="$REPO_WHITELIST" \
+--log-level="debug" &> /tmp/atlantis-server.log &
