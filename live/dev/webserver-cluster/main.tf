@@ -50,7 +50,7 @@ data "template_file" "user_data" {
   }
 }
 
-// retrieve permissions fro ec2 instances
+// retrieve permissions for ec2 instances
 data "aws_iam_instance_profile" "ora2postgres_atlantis" {
   name = "ora2postgres_atlantis"
 }

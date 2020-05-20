@@ -1,4 +1,14 @@
 ###
+# purpose of the asg module
+# - setup autoscaling group for atlantis to listen github webhook
+# - apply infrastructure changes using terraform
+# - open inbound ports: 22(ssh), 4141(atlantis)
+###
+provider "aws" {
+  version                 = "~> 2.0"
+  region                  = "eu-west-2"
+}
+
 data "aws_vpc" "default" {
   default = true
 }
