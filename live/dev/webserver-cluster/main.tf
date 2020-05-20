@@ -64,7 +64,7 @@ resource "aws_key_pair" "deployer" {
 module "asg" {
   source = "../../../modules/cluster/asg"
 
-  region  = var.region
+  region = var.region
 
   cluster_name           = "tf-atlantis"
   db_remote_state_bucket = "tf-state-eu-west-2-rnbv"
@@ -85,7 +85,7 @@ module "asg" {
 module "alb" {
   source = "../../../modules/networking/alb"
 
-  region  = var.region
+  region = var.region
 
   cluster_name           = "tf-atlantis"
   db_remote_state_bucket = "tf-state-eu-west-2-rnbv"
@@ -103,10 +103,10 @@ module "security" {
 module "github" {
   source = "../../../modules/common/github"
 
-  webhook_url = local.atlantis_url
-  webhook_secret = local.webhook_secret
-  github_token = local.github_token
-  organization_name = local.github_username
+  webhook_url                 = local.atlantis_url
+  webhook_secret              = local.webhook_secret
+  github_token                = local.github_token
+  organization_name           = local.github_username
   atlantis_allowed_repo_names = [local.github_repo]
 }
 
@@ -145,4 +145,4 @@ resource "aws_instance" "secondserver" {
   subnet_id = data.aws_subnet.default.id
 }
 */
-    
+
