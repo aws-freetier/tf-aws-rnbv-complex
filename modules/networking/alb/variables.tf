@@ -1,4 +1,9 @@
 ###
+variable "region" {
+  description = "Region in which to create the cluster and run Atlantis."
+  type        = string
+}
+
 variable "cluster_name" {
   description = "The name to use for all the cluster resources"
   type        = string

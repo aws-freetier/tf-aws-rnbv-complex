@@ -4,11 +4,6 @@
 # - apply infrastructure changes using terraform
 # - open inbound ports: 22(ssh), 4141(atlantis)
 ###
-provider "aws" {
-  version                 = "~> 2.0"
-  region                  = "eu-west-2"
-}
-
 data "aws_vpc" "default" {
   default = true
 }
@@ -23,19 +18,15 @@ data "terraform_remote_state" "db" {
   config = {
     bucket = var.db_remote_state_bucket
     key    = var.db_remote_state_key
-    region = "eu-west-2"
+    region = var.region
   }
 }
 
 resource "aws_launch_configuration" "this" {
   image_id      = var.image_id
   instance_type = var.instance_type
-//  https://github.com/terraform-providers/terraform-provider-aws/issues/8480
-  security_groups = [
-    aws_security_group.world.id,
-    aws_security_group.atlantis.id,
-    aws_security_group.ssh.id
-  ]
+  //  https://github.com/terraform-providers/terraform-provider-aws/issues/8480
+  security_groups      = [aws_security_group.instance.id]
   key_name             = var.key_name
   user_data            = var.user_data
   iam_instance_profile = var.iam_instance_profile
@@ -62,45 +53,33 @@ resource "aws_autoscaling_group" "this" {
   }
 }
 
-resource "aws_security_group" "ssh" {
-  name = "${var.cluster_name}-ssh"
-}
+resource "aws_security_group" "instance" {
+  name        = "${var.cluster_name}-atlantis"
+  description = "Set of rules for atlantis instance"
+  vpc_id      = data.aws_vpc.default.id
 
-resource "aws_security_group_rule" "allow_ssh" {
-  type              = "ingress"
-  security_group_id = aws_security_group.ssh.id
+  ingress {
+    description = "SSH from VPC"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-  from_port   = 22
-  to_port     = 22
-  protocol    = "TCP"
-  cidr_blocks = ["0.0.0.0/0"]
-}
+  ingress {
+    description = "Atlantis service"
+    from_port   = 4141
+    to_port     = 4141
+    protocol    = "TCP"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-resource "aws_security_group" "atlantis" {
-  name = "${var.cluster_name}-atlantis"
-}
-
-resource "aws_security_group_rule" "allow_atlantis" {
-  type              = "ingress"
-  security_group_id = aws_security_group.atlantis.id
-
-  from_port   = 4141
-  to_port     = 4141
-  protocol    = "TCP"
-  cidr_blocks = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group" "world" {
-  name = "${var.cluster_name}-out"
-}
-
-resource "aws_security_group_rule" "allow_all_out" {
-  type              = "egress"
-  security_group_id = aws_security_group.world.id
-
-  from_port        = 0
-  to_port          = 0
-  protocol         = -1
-  cidr_blocks      = ["0.0.0.0/0"]
-  ipv6_cidr_blocks = ["::/0"]
+  egress {
+    description      = "Allow all connection from"
+    from_port        = 0
+    to_port          = 0
+    protocol         = -1
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
 }
