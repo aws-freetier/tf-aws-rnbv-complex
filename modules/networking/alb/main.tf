@@ -17,7 +17,7 @@ data "terraform_remote_state" "db" {
   config = {
     bucket = var.db_remote_state_bucket
     key    = var.db_remote_state_key
-    region = "eu-west-2"
+    region = var.region
   }
 }
 
@@ -46,40 +46,27 @@ resource "aws_lb_listener" "http" {
 }
 
 resource "aws_security_group" "atlantis" {
-  name = "${var.cluster_name}-alb"
-}
+  name        = "${var.cluster_name}-alb"
+  description = "Set of rules for atlantis cluster"
+  vpc_id      = data.aws_vpc.default.id
 
-resource "aws_security_group_rule" "allow_atlantis_in" {
-  type              = "ingress"
-  security_group_id = aws_security_group.atlantis.id
+  ingress {
+    description      = "Allow traffic to atlantis"
+    from_port        = 80
+    to_port          = 4141
+    protocol         = "TCP"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
 
-  from_port        = 80
-  to_port          = 4141
-  protocol         = "TCP"
-  cidr_blocks      = ["0.0.0.0/0"]
-  ipv6_cidr_blocks = ["::/0"]
-}
-
-resource "aws_security_group_rule" "allow_web_in" {
-  type              = "ingress"
-  security_group_id = aws_security_group.atlantis.id
-
-  from_port        = 80
-  to_port          = 80
-  protocol         = "TCP"
-  cidr_blocks      = ["0.0.0.0/0"]
-  ipv6_cidr_blocks = ["::/0"]
-}
-
-resource "aws_security_group_rule" "allow_all_out" {
-  type              = "egress"
-  security_group_id = aws_security_group.atlantis.id
-
-  from_port        = 0
-  to_port          = 0
-  protocol         = -1
-  cidr_blocks      = ["0.0.0.0/0"]
-  ipv6_cidr_blocks = ["::/0"]
+  egress {
+    description      = "Allow all connection from"
+    from_port        = 0
+    to_port          = 0
+    protocol         = -1
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
 }
 
 resource "aws_lb_target_group" "atlantis" {

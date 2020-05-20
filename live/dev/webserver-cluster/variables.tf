@@ -8,3 +8,9 @@ locals {
   github_repo       = "tf-aws-rnbv-complex"
   github_repo_url   = "github.com/${local.github_username}/${local.github_repo}"
 }
+
+variable "region" {
+  description = "Region in which to create the cluster and run Atlantis."
+  type        = string
+  default     = "eu-west-2"
+}

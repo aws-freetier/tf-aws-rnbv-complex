@@ -1,7 +1,7 @@
 ###
 provider "aws" {
   version = "~> 2.0"
-  region  = "eu-west-2"
+  region  = var.region
 }
 
 terraform {
@@ -64,6 +64,8 @@ resource "aws_key_pair" "deployer" {
 module "asg" {
   source = "../../../modules/cluster/asg"
 
+  region  = var.region
+
   cluster_name           = "tf-atlantis"
   db_remote_state_bucket = "tf-state-eu-west-2-rnbv"
   db_remote_state_key    = "dev/services/webserver-cluster/terraform.tfstate"
@@ -82,6 +84,8 @@ module "asg" {
 // setup loadbalancer
 module "alb" {
   source = "../../../modules/networking/alb"
+
+  region  = var.region
 
   cluster_name           = "tf-atlantis"
   db_remote_state_bucket = "tf-state-eu-west-2-rnbv"
@@ -141,3 +145,4 @@ resource "aws_instance" "secondserver" {
   subnet_id = data.aws_subnet.default.id
 }
 */
+    

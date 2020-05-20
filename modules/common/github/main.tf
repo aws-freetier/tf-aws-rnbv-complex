@@ -5,8 +5,8 @@
 # - webhook scope: "issue_comment", "pull_request", "pull_request_review", "pull_request_review_comment"
 ###
 provider "github" {
-  token      = var.github_token
-  individual = false
+  token        = var.github_token
+  individual   = false
   organization = var.organization_name
 }
 
