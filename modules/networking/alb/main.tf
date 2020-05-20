@@ -1,4 +1,8 @@
 ###
+# purpose of the alb module
+# - provide public domain name for github webhook
+# - balance requests to atlantis (forward http requests from port 80 on alb to port 4141 on atlantis running on ec2)
+###
 data "aws_vpc" "default" {
   default = true
 }

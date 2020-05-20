@@ -1,4 +1,8 @@
 ###
+# purpose of the security module
+# - generate random secret string for webhook
+# - retrieve secretString values from secrets manager (see outputs.tf)
+###
 data "aws_secretsmanager_secret" "this" {
   name = var.name
 }
