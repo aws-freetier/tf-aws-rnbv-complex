@@ -28,12 +28,12 @@ data "terraform_remote_state" "db" {
 }
 
 resource "aws_launch_configuration" "this" {
-  image_id             = var.image_id
-  instance_type        = var.instance_type
-  security_groups      = [aws_security_group.dmz.id]
-  key_name             = var.key_name
-  user_data            = var.user_data
-  iam_instance_profile = var.iam_instance_profile
+  image_id               = var.image_id
+  instance_type          = var.instance_type
+  vpc_security_group_ids = [aws_security_group.dmz.id]
+  key_name               = var.key_name
+  user_data              = var.user_data
+  iam_instance_profile   = var.iam_instance_profile
 
   lifecycle {
     create_before_destroy = true
