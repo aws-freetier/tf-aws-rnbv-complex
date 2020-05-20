@@ -140,4 +140,3 @@ resource "aws_instance" "secondserver" {
   subnet_id = data.aws_subnet.default.id
 }
 */
-
