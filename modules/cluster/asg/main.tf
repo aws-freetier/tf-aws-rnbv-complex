@@ -30,6 +30,7 @@ data "terraform_remote_state" "db" {
 resource "aws_launch_configuration" "this" {
   image_id      = var.image_id
   instance_type = var.instance_type
+//  https://github.com/terraform-providers/terraform-provider-aws/issues/8480
   security_groups = [
     aws_security_group.world.id,
     aws_security_group.atlantis.id,
