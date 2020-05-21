@@ -3,14 +3,6 @@
 # - provide public domain name for github webhook
 # - balance requests to atlantis (forward http requests from port 80 on alb to port 4141 on atlantis running on ec2)
 ###
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnet_ids" "default" {
-  vpc_id = data.aws_vpc.default.id
-}
-
 data "terraform_remote_state" "db" {
   backend = "s3"
 
@@ -25,8 +17,8 @@ resource "aws_lb" "this" {
   name = "${var.cluster_name}-alb"
 
   load_balancer_type = "application"
-  subnets            = data.aws_subnet_ids.default.ids
-  security_groups    = [aws_security_group.atlantis.id]
+  subnets            = var.subnet_ids
+  security_groups    = var.security_groups
 }
 
 resource "aws_lb_listener" "http" {
@@ -45,36 +37,12 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-resource "aws_security_group" "atlantis" {
-  name        = "${var.cluster_name}-alb"
-  description = "Set of rules for atlantis cluster"
-  vpc_id      = data.aws_vpc.default.id
-
-  ingress {
-    description      = "Allow traffic to atlantis"
-    from_port        = 80
-    to_port          = 4141
-    protocol         = "TCP"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    description      = "Allow all connection from"
-    from_port        = 0
-    to_port          = 0
-    protocol         = -1
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-}
-
 resource "aws_lb_target_group" "atlantis" {
-  name = "${var.cluster_name}-atlantis"
+  name = "${var.cluster_name}-alb-tg"
 
   port     = 4141
   protocol = "HTTP"
-  vpc_id   = data.aws_vpc.default.id
+  vpc_id   = var.vpc_id
 
   health_check {
     path                = "/healthz"

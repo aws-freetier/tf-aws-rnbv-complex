@@ -3,6 +3,16 @@
 # - generate random secret string for webhook
 # - retrieve secretString values from secrets manager (see outputs.tf)
 ###
+data "terraform_remote_state" "db" {
+  backend = "s3"
+
+  config = {
+    bucket = var.db_remote_state_bucket
+    key    = var.db_remote_state_key
+    region = var.region
+  }
+}
+
 data "aws_secretsmanager_secret" "this" {
   name = var.name
 }

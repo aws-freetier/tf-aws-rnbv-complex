@@ -4,9 +4,25 @@ variable "region" {
   type        = string
 }
 
+variable "vpc_id" {
+  description = "The VPC id"
+  type        = string
+}
+
+variable "subnet_ids" {
+  description = "A list of subnet IDs to launch resources in"
+  type        = list(string)
+}
+
 variable "cluster_name" {
   description = "The name to use for all the cluster resources"
   type        = string
+}
+
+variable "security_groups" {
+  description = "A list of security group IDs to assign to the launch configuration"
+  type        = list(string)
+  default     = []
 }
 
 variable "db_remote_state_bucket" {
