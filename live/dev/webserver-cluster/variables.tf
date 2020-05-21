@@ -1,7 +1,7 @@
 locals {
   instance_type     = "t2.micro"
   secretmanager_key = "dev/atlantis/github"
-  atlantis_url      = "http://${module.alb.alb_dns_name}/events"
+  atlantis_url      = "https://${module.alb.alb_dns_name}/events"
   webhook_secret    = module.security.webhook_secret
   github_username   = "aws-freetier"
   github_token      = module.security.github_token

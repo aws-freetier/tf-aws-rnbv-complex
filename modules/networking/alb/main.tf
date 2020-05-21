@@ -1,7 +1,7 @@
 ###
 # purpose of the alb module
 # - provide public domain name for github webhook
-# - balance requests to atlantis (forward http requests from port 80 on alb to port 4141 on atlantis running on ec2)
+# - balance requests to atlantis (forward http requests from port 443 on alb to port 4141 on atlantis running on ec2)
 ###
 data "aws_vpc" "default" {
   default = true
@@ -29,9 +29,9 @@ resource "aws_lb" "this" {
   security_groups    = [aws_security_group.atlantis.id]
 }
 
-resource "aws_lb_listener" "http" {
+resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.this.arn
-  port              = 80
+  port              = 443
   protocol          = "HTTP"
 
   default_action {
@@ -52,7 +52,7 @@ resource "aws_security_group" "atlantis" {
 
   ingress {
     description      = "Allow traffic to atlantis"
-    from_port        = 80
+    from_port        = 443
     to_port          = 4141
     protocol         = "TCP"
     cidr_blocks      = ["0.0.0.0/0"]
@@ -88,7 +88,7 @@ resource "aws_lb_target_group" "atlantis" {
 }
 
 resource "aws_lb_listener_rule" "atlantis" {
-  listener_arn = aws_lb_listener.http.arn
+  listener_arn = aws_lb_listener.https.arn
   priority     = 100
 
   condition {

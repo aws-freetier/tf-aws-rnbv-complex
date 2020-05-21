@@ -42,6 +42,7 @@ data "template_file" "user_data" {
   template = file("${path.module}/user-data.sh")
 
   vars = {
+    domain_name    = module.alb.alb_dns_name
     url            = local.atlantis_url
     webhook_secret = local.webhook_secret
     username       = local.github_username
