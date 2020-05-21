@@ -32,3 +32,18 @@ variable "organization_name" {
   type        = string
   default     = ""
 }
+
+variable "region" {
+  description = "Region in which to create the cluster and run Atlantis."
+  type        = string
+}
+
+variable "db_remote_state_bucket" {
+  description = "The name of the S3 bucket for the database's remote state"
+  type        = string
+}
+
+variable "db_remote_state_key" {
+  description = "The path for the database's remote state in S3"
+  type        = string
+}

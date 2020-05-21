@@ -40,6 +40,14 @@ data "aws_ami" "ami2" {
 
 data "template_file" "user_data" {
   template = file("${path.module}/user-data.sh")
+
+  vars = {
+    url            = local.atlantis_url
+    webhook_secret = local.webhook_secret
+    username       = local.github_username
+    token          = local.github_token
+    repo_whitelist = local.github_repo_url
+  }
 }
 
 // retrieve permissions for ec2 instances

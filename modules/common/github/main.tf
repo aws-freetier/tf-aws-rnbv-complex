@@ -10,6 +10,16 @@ provider "github" {
   organization = var.organization_name
 }
 
+data "terraform_remote_state" "db" {
+  backend = "s3"
+
+  config = {
+    bucket = var.db_remote_state_bucket
+    key    = var.db_remote_state_key
+    region = var.region
+  }
+}
+
 resource "github_repository_webhook" "this" {
   count = var.create_github_repository_webhook ? length(var.atlantis_allowed_repo_names) : 0
 
