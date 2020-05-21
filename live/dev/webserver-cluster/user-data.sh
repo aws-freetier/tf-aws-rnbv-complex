@@ -2,6 +2,7 @@
 sudo yum -y update
 
 mkdir ~/downloads
+mkdir ~/tls
 
 # install required software git, terraform, atlantis
 sudo yum -y install git
@@ -10,10 +11,10 @@ wget -O ~/downloads/atlantis.zip https://github.com/runatlantis/atlantis/release
 sudo unzip -o ~/downloads/terraform.zip -d /usr/local/bin/
 sudo unzip -o ~/downloads/atlantis.zip -d /usr/local/bin/
 
-sudo openssl genrsa -out ~/downloads/tls.key 2048
-sudo openssl req -new -x509 -key ~/downloads/tls.key -out ~/downloads/tls.cert -days 360 -subj /CN=${domain_name}
-sudo chmod 0600 ~/downloads/tls.key
-sudo chmod 0600 ~/downloads/tls.cert
+sudo openssl genrsa -out ~/tls/tls.key 2048
+sudo openssl req -new -x509 -key ~/tls/tls.key -out ~/tls/tls.cert -days 360 -subj /CN=${domain_name}
+sudo chmod 0600 ~/tls/tls.key
+sudo chmod 0600 ~/tls/tls.cert
 
 # set env variables required for proper work of atlantis
 #
@@ -44,8 +45,8 @@ export REPO_WHITELIST=${repo_whitelist}
 # run atlantis service in background, log activity to /tmp/atlantis-server.log
 atlantis server \
 --atlantis-url="$URL" \
---ssl-cert-file=~/downloads/tls.cert \
---ssl-key-file=~/downloads/tls.key \
+--ssl-cert-file=/root/tls/tls.cert \
+--ssl-key-file=/root/tls/tls.key \
 --gh-user="$USERNAME" \
 --gh-token="$TOKEN" \
 --gh-webhook-secret="$SECRET" \
