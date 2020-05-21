@@ -1,5 +1,5 @@
 version: 3
 projects:
-  - dir: live/atlantis-cluster
+  - dir: live/dev/webserver-cluster
     autoplan:
       when_modified: ["../../modules/**/*.tf", "../dev/**/*.tf", "../prod/**/*.tf", "*.tf*"]
