@@ -4,23 +4,23 @@ provider "aws" {
   //  region                  = "eu-west-2"
 }
 
-resource "aws_vpc" "this" {
+data "aws_availability_zones" "all" {
+  all_availability_zones = true
+}
+
+resource "aws_vpc" "vpc_1" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
 
   tags = {
-    Name = "vpcdemo"
+    Name = "vpc_1"
   }
-}
-
-data "aws_availability_zones" "all" {
-  all_availability_zones = true
 }
 
 resource "aws_subnet" "public" {
   count = length(local.public_subnets) > 0 ? length(local.public_subnets) : 0
 
-  vpc_id                  = aws_vpc.this.id
+  vpc_id                  = aws_vpc.vpc_1.id
   cidr_block              = local.public_subnets[count.index]
   availability_zone       = data.aws_availability_zones.all.names[count.index]
   map_public_ip_on_launch = true
@@ -33,7 +33,7 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "app" {
   count = length(local.private_subnets_app) > 0 ? length(local.private_subnets_app) : 0
 
-  vpc_id            = aws_vpc.this.id
+  vpc_id            = aws_vpc.vpc_1.id
   cidr_block        = local.private_subnets_app[count.index]
   availability_zone = data.aws_availability_zones.all.names[count.index]
 
@@ -45,7 +45,7 @@ resource "aws_subnet" "app" {
 resource "aws_subnet" "db" {
   count = length(local.private_subnets_db) > 0 ? length(local.private_subnets_db) : 0
 
-  vpc_id            = aws_vpc.this.id
+  vpc_id            = aws_vpc.vpc_1.id
   cidr_block        = local.private_subnets_db[count.index]
   availability_zone = data.aws_availability_zones.all.names[count.index]
 
@@ -55,7 +55,7 @@ resource "aws_subnet" "db" {
 }
 
 resource "aws_internet_gateway" "this" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc_1.id
 
   tags = {
     Name = "igw-vpcdemo"
@@ -63,7 +63,7 @@ resource "aws_internet_gateway" "this" {
 }
 
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc_1.id
 
   tags = {
     Name = "rt-public"
@@ -84,7 +84,7 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table" "private_a" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc_1.id
 
   tags = {
     Name = "rt-private-a"
@@ -108,7 +108,7 @@ resource "aws_route_table_association" "private_a_db" {
 }
 
 resource "aws_route_table" "private_b" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc_1.id
 
   tags = {
     Name = "rt-private-b"
@@ -185,7 +185,7 @@ resource "aws_key_pair" "deployer" {
 
 resource "aws_security_group" "sg_bastion" {
   name   = "sg_bastion"
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc_1.id
 
   ingress {
     description = "SSH from VPC"
@@ -207,7 +207,7 @@ resource "aws_security_group" "sg_bastion" {
 
 resource "aws_security_group" "sg_app" {
   name   = "sg_app"
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc_1.id
 
   ingress {
     from_port       = 22
@@ -226,24 +226,128 @@ resource "aws_security_group" "sg_app" {
   }
 }
 
-resource "aws_eip" "nat-a" {
+resource "aws_eip" "nat_a" {
   vpc = true
 }
 
 resource "aws_nat_gateway" "sn_a" {
-  allocation_id = aws_eip.nat-a.id
+  allocation_id = aws_eip.nat_a.id
   subnet_id     = element(aws_subnet.public.*.id, 0)
 
   depends_on = [aws_internet_gateway.this]
 }
 
-resource "aws_eip" "nat-b" {
+resource "aws_eip" "nat_b" {
   vpc = true
 }
 
 resource "aws_nat_gateway" "sn_b" {
-  allocation_id = aws_eip.nat-b.id
+  allocation_id = aws_eip.nat_b.id
   subnet_id     = element(aws_subnet.public.*.id, 1)
 
   depends_on = [aws_internet_gateway.this]
+}
+
+resource "aws_vpc" "vpc_2" {
+  cidr_block           = "10.1.10.0/24"
+  enable_dns_hostnames = true
+
+  tags = {
+    Name = "vpc_2"
+  }
+}
+
+resource "aws_subnet" "public_vpc_2" {
+  count = length(local.public_subnets_vpc_2) > 0 ? length(local.public_subnets_vpc_2) : 0
+
+  vpc_id                  = aws_vpc.vpc_2.id
+  cidr_block              = local.public_subnets_vpc_2[count.index]
+  availability_zone       = data.aws_availability_zones.all.names[count.index]
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "sn-public-${local.subnet_sfx[count.index]}-vpc-2"
+  }
+}
+
+resource "aws_subnet" "app_vpc_2" {
+  count = length(local.private_subnets_app_vpc_2) > 0 ? length(local.private_subnets_app_vpc_2) : 0
+
+  vpc_id            = aws_vpc.vpc_2.id
+  cidr_block        = local.private_subnets_app_vpc_2[count.index]
+  availability_zone = data.aws_availability_zones.all.names[count.index]
+
+  tags = {
+    Name = "sn-app-${local.subnet_sfx[count.index]}-vpc-2"
+  }
+}
+
+resource "aws_vpc_peering_connection" "vpc1_vpc2" {
+  peer_vpc_id   = aws_vpc.vpc_2.id
+  vpc_id        = aws_vpc.vpc_1.id
+  auto_accept   = true
+
+  tags = {
+    Name = "vpc_1-vpc_2"
+  }
+}
+
+resource "aws_route" "vpc_2" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = aws_vpc.vpc_2.cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc1_vpc2.id
+}
+
+resource "aws_route_table_association" "public_vpc_2" {
+  subnet_id      = element(aws_subnet.public.*.id, 0)
+  route_table_id = aws_route_table.public.id
+}
+
+data "aws_route_table" "vpc2_default" {
+  vpc_id = aws_vpc.vpc_2.id
+}
+
+resource "aws_route" "vpc2public" {
+  route_table_id         = data.aws_route_table.vpc2_default.id
+  destination_cidr_block = aws_vpc.vpc_1.cidr_block
+  vpc_peering_connection_id = aws_vpc_peering_connection.vpc1_vpc2.id
+}
+
+resource "aws_route_table_association" "_vpc_2_public" {
+  subnet_id      = element(aws_subnet.app_vpc_2.*.id, 0)
+  route_table_id = data.aws_route_table.vpc2_default.id
+}
+
+resource "aws_instance" "app_a_vpc_2" {
+  ami                         = data.aws_ami.ami2.id
+  associate_public_ip_address = false
+  instance_type               = "t2.micro"
+  key_name                    = aws_key_pair.deployer.key_name
+  security_groups             = [aws_security_group.sg_app_vpc_2.id]
+  subnet_id                   = element(aws_subnet.app_vpc_2.*.id, 0)
+
+  tags = {
+    Name = "app-a-vpc-2"
+  }
+}
+
+resource "aws_security_group" "sg_app_vpc_2" {
+  name   = "sg_app_vpc_2"
+  vpc_id = aws_vpc.vpc_2.id
+
+  ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "TCP"
+    security_groups = [aws_security_group.sg_bastion.id]
+  }
+
+  egress {
+    description      = "Allow all connection from"
+    from_port        = 0
+    to_port          = 0
+    protocol         = -1
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
 }
