@@ -1,5 +1,5 @@
 version: 3
 projects:
-  - dir: live/dev/webserver-cluster
+  - dir: live/prod/webserver-cluster
     autoplan:
-      when_modified: ["../../modules/**/*.tf", "../dev/**/*.tf", "../prod/**/*.tf", "*.tf*"]
+      when_modified: ["../../modules/**/*.tf", "../prod/**/*.tf", "*.tf*"]

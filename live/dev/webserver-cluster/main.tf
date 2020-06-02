@@ -149,9 +149,9 @@ resource "aws_security_group" "sg_app_vpc_2" {
 module "vpn" {
   source = "../../../modules/networking/vpc"
 
-//  db_remote_state_bucket = "tf-state-eu-west-2-rnbv"
-//  db_remote_state_key    = "live/dev/webserver-cluster/terraform.tfstate"
-  region                 = var.region
+  //  db_remote_state_bucket = "tf-state-eu-west-2-rnbv"
+  //  db_remote_state_key    = "live/dev/webserver-cluster/terraform.tfstate"
+  region = var.region
 
   cidr_block_vpc1 = "10.0.0.0/16"
   cidr_block_vpc2 = "10.1.10.0/24"

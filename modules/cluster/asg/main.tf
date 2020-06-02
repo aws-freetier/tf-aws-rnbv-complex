@@ -4,16 +4,6 @@
 # - apply infrastructure changes using terraform
 # - open inbound ports: 22(ssh), 4141(atlantis)
 ###
-data "terraform_remote_state" "db" {
-  backend = "s3"
-
-  config = {
-    bucket = var.db_remote_state_bucket
-    key    = var.db_remote_state_key
-    region = var.region
-  }
-}
-
 resource "aws_launch_configuration" "this" {
   image_id      = var.image_id
   instance_type = var.instance_type
