@@ -18,7 +18,7 @@ terraform {
 }
 
 // for demo purpose
-/*
+
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -48,4 +48,4 @@ resource "aws_instance" "secondserver" {
   }
   subnet_id = data.aws_subnet.default.id
 }
-*/
+
