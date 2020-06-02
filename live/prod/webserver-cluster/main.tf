@@ -4,9 +4,22 @@ provider "aws" {
   region  = var.region
 }
 
-// for demo purpose
+terraform {
+  required_version = "~> v0.12"
 
-  data "aws_ami" "ubuntu" {
+  backend "s3" {
+    bucket = "tf-state-eu-west-2-rnbv"
+    key    = "eu-west-2/live/prod/webserver-cluster/terraform.tfstate"
+    region = "eu-west-2"
+
+    dynamodb_table = "tf-locks-eu-west-2-rnbv"
+    encrypt        = true
+  }
+}
+
+// for demo purpose
+/*
+data "aws_ami" "ubuntu" {
   most_recent = true
 
   filter {
@@ -35,4 +48,4 @@ resource "aws_instance" "secondserver" {
   }
   subnet_id = data.aws_subnet.default.id
 }
-
+*/
