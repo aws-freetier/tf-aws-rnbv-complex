@@ -1,24 +1,38 @@
 ###
-# purpose of the alb module
-# - provide public domain name for github webhook
-# - balance requests to atlantis (forward http requests from port 80 on alb to port 4141 on atlantis running on ec2)
-###
-data "terraform_remote_state" "db" {
+provider "aws" {
+  version = "~> 2.0"
+  region  = var.region
+}
+
+terraform {
+  required_version = "~> v0.12"
+
+  backend "s3" {
+    bucket = "tf-state-eu-west-2-rnbv"
+    key    = "eu-west-2/mgmt/networking/alb/terraform.tfstate"
+    region = "eu-west-2"
+
+    dynamodb_table = "tf-locks-eu-west-2-rnbv"
+    encrypt        = true
+  }
+}
+
+data "terraform_remote_state" "vpc" {
   backend = "s3"
 
   config = {
-    bucket = var.db_remote_state_bucket
-    key    = var.db_remote_state_key
+    bucket = var.vpc_remote_state_bucket
+    key    = var.vpc_remote_state_key
     region = var.region
   }
 }
 
 resource "aws_lb" "this" {
-  name = "${var.cluster_name}-alb"
+  name = "atlantis-alb"
 
   load_balancer_type = "application"
-  subnets            = var.subnet_ids
-  security_groups    = var.security_groups
+  subnets            = data.terraform_remote_state.vpc.outputs.default_subnet_ids
+  security_groups    = [data.terraform_remote_state.vpc.outputs.vpc_alb_sg_id]
 }
 
 resource "aws_lb_listener" "http" {
@@ -38,11 +52,11 @@ resource "aws_lb_listener" "http" {
 }
 
 resource "aws_lb_target_group" "atlantis" {
-  name = "${var.cluster_name}-alb-tg"
+  name = "atlantis-alb-tg"
 
   port     = 4141
   protocol = "HTTP"
-  vpc_id   = var.vpc_id
+  vpc_id   = data.terraform_remote_state.vpc.outputs.default_vpc_id
 
   health_check {
     path                = "/healthz"
@@ -55,7 +69,7 @@ resource "aws_lb_target_group" "atlantis" {
   }
 }
 
-resource "aws_lb_listener_rule" "atlantis" {
+resource "aws_lb_listener_rule" "atlantis_events" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 100
 
@@ -70,3 +84,4 @@ resource "aws_lb_listener_rule" "atlantis" {
     target_group_arn = aws_lb_target_group.atlantis.arn
   }
 }
+
