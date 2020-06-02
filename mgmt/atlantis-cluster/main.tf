@@ -9,7 +9,7 @@ terraform {
 
   backend "s3" {
     bucket = "tf-state-eu-west-2-rnbv"
-    key    = "eu-west-2/mgmt/atlantis-cluster/main.tf/terraform.tfstate"
+    key    = "eu-west-2/mgmt/atlantis-cluster/terraform.tfstate"
     region = "eu-west-2"
 
     dynamodb_table = "tf-locks-eu-west-2-rnbv"
